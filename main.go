@@ -1,6 +1,6 @@
 package main
 
-import "github.com/ReolinkCameraApi/reolink-go-manager/cmd"
+import "github.com/ReolinkCameraApi/noctiluca-go-server/cmd"
 
 func main() {
 	cmd.Execute()
