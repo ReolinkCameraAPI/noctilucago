@@ -1,6 +1,14 @@
 <p align="center"><img src="https://github.com/ReolinkCameraAPI/noctiluca-go-server/blob/main/.assets/noctiluca.png" width=100px></p>
 <h1 align="center">NoctiLuca Server</h1>
 
+<p align="center">
+<img alt="Reolink Approval" src="https://img.shields.io/badge/reolink-approved-blue?style=flat-square">
+<img alt="GitHub" src="https://img.shields.io/github/license/ReolinkCameraApi/noctiluca-go-server?style=flat-square">
+<img alt="Discord" src="https://img.shields.io/discord/773257004911034389?style=flat-square">
+</p>
+
+---
+
 A Reolink Camera Management server written in Go built off of 
 the [reolink-go-api](https://github.com/ReolinkCameraApi/reolink-go-api).
 This is the backend to the NoctiLuca frontend.
@@ -45,3 +53,15 @@ This is the backend to the NoctiLuca frontend.
     NOC_HOST=0.0.0.0
     NOC_PORT=8000
     NOC_DNS=""
+    
+
+### Supported Cameras
+
+Any Reolink camera that has a web UI should work. The other's requiring special Reolink clients
+do not work and is not supported here.
+
+- RLC-411WS
+- RLC-423
+- RLC-420-5MP
+- RLC-410-5MP
+- RLC-520
