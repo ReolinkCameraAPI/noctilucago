@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/ReolinkCameraApi/noctiluca-go-server/internal/pkg/database"
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/procedures"
 	"github.com/spf13/cobra"
 )
 
@@ -12,10 +12,16 @@ func init() {
 var migrateCmd = &cobra.Command{
 	Use:   "migrate",
 	Short: "Run NoctiLuca Database Migration Tool.",
-	Long:  `Run NoctiLuca Database Migration Tool will auto-migrate all database structs defined to the set Database.
+	Long: `Run NoctiLuca Database Migration Tool will auto-migrate all database structs defined to the set Database.
 	To set an external DB use the NOCTI_DB environment variable.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := database.Migrate(); err != nil {
+		db, err := procedures.NewDatabase()
+
+		if err != nil {
+			return err
+		}
+
+		if err := db.Migrate(); err != nil {
 			return err
 		}
 		return nil

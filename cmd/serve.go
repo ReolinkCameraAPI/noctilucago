@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ReolinkCameraApi/noctiluca-go-server/internal/pkg/api"
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/api"
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/procedures"
 	"github.com/fvbock/endless"
-	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -28,12 +28,14 @@ var serveCmd = &cobra.Command{
 }
 
 func Serve() error {
-	router := gin.Default()
-	handler := api.NewApiHandler(router)
+	db, err := procedures.NewDatabase()
 
-	handler.Unprotected.GET("/version", func(context *gin.Context) {
-		context.String(200, "v0.0.1")
-	})
+	if err != nil {
+		return err
+	}
+
+	handler := api.NewApiHandler(db)
+	handler.CreateEndpoints()
 
 	port := os.Getenv("RM_PORT")
 	host := os.Getenv("RM_HOST")
@@ -47,9 +49,10 @@ func Serve() error {
 	}
 
 	log.Printf("Serving on %s:%s", host, port)
-	err := endless.ListenAndServe(fmt.Sprintf("%s:%s", host, port), router)
-	if err != nil {
+
+	if err := endless.ListenAndServe(fmt.Sprintf("%s:%s", host, port), handler.Router); err != nil {
 		return err
 	}
+
 	return nil
 }

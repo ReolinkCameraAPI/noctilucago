@@ -1,6 +1,7 @@
-package database
+package procedures
 
 import (
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models"
 	_ "gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	_ "gorm.io/driver/sqlite"
@@ -13,15 +14,12 @@ type DB struct {
 	*gorm.DB
 }
 
-func Migrate() error {
-	var err error
+func NewDatabase() (*DB, error) {
 	var db *gorm.DB
-	// var dbConstraints *gorm.DB
+	var err error
 
-	var tables []interface{}
-
-	maxIdleConns := 0
-	maxConnLifetime := time.Minute * 2
+	maxIdleConns := 2
+	maxConnLifetime := time.Hour * 1
 
 	if os.Getenv("NOCTI_DB") == "" {
 		db, err = gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
@@ -30,18 +28,30 @@ func Migrate() error {
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Get the generic DB interface
 	sqlDb, err := db.DB()
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	sqlDb.SetMaxIdleConns(maxIdleConns)
 	sqlDb.SetConnMaxLifetime(maxConnLifetime)
+
+	return &DB{db}, nil
+}
+
+func (db *DB) Migrate() error {
+	var tables []interface{}
+
+	tables = append(tables, models.Camera{})
+	tables = append(tables, models.CameraModel{})
+	tables = append(tables, models.CameraLocation{})
+
+	tables = append(tables, models.Proxy{})
 
 	if err := db.Debug().AutoMigrate(tables...); err != nil {
 		return err
