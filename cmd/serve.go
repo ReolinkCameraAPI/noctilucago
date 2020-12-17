@@ -16,9 +16,9 @@ func init() {
 
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "Run Reolink Management Server.",
-	Long: `Reolink Management Server will run on port 8000 and bind to the host IP. 
-	This can be defined with RM_PORT and RM_HOST`,
+	Short: "Run NoctiLuca Server.",
+	Long: `NoctiLuca Server will run on port 8000 and bind to the host IP. 
+	This can be defined with NOC_PORT and NOC_HOST`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := Serve(); err != nil {
 			return err
@@ -37,8 +37,8 @@ func Serve() error {
 	handler := api.NewApiHandler(db)
 	handler.CreateEndpoints()
 
-	port := os.Getenv("RM_PORT")
-	host := os.Getenv("RM_HOST")
+	port := os.Getenv("NOC_PORT")
+	host := os.Getenv("NOC_HOST")
 
 	if port == "" {
 		port = "8000"

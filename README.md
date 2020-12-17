@@ -13,7 +13,14 @@ A Reolink Camera Management server written in Go built off of
 the [reolink-go-api](https://github.com/ReolinkCameraApi/reolink-go-api).
 This is the backend to the NoctiLuca frontend.
 
+### Sponsorship
 
+<a href="https://oleaintueri.com"><img src="https://oleaintueri.com/images/oliv.svg" width="60px"/><img width="200px" style="padding-bottom: 10px" src="https://oleaintueri.com/images/oleaintueri.svg"/></a>
+
+[Oleaintueri](https://oleaintueri.com) is sponsoring the development and maintenance of these projects within their organisation.
+
+
+---
 
 ### This is still untested and heavily in development.
 

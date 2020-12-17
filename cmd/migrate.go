@@ -13,7 +13,7 @@ var migrateCmd = &cobra.Command{
 	Use:   "migrate",
 	Short: "Run NoctiLuca Database Migration Tool.",
 	Long: `Run NoctiLuca Database Migration Tool will auto-migrate all database structs defined to the set Database.
-	To set an external DB use the NOCTI_DB environment variable.`,
+	To set an external DB use the NOC_DSN environment variable.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		db, err := procedures.NewDatabase()
 

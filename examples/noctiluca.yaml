@@ -1,0 +1,13 @@
+# the database url in the format: provider://username:password@host:port/endpoint
+dsn: "postgres://foo:bar@127.0.0.1:5432/database?sslmode=verify-ca&sslrootcert=/etc/config/sever-ca.pem"
+serve:
+  host: "0.0.0.0"
+  port: 8000
+auth:
+  jwt:
+    enabled: false
+    key: a-very-strong-key
+    # timeout is in seconds
+    timeout:  500
+    # refresh is in seconds
+    refresh:  500
