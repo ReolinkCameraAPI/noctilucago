@@ -1,5 +1,5 @@
 # the database url in the format: provider://username:password@host:port/endpoint
-dsn: "postgres://foo:bar@127.0.0.1:5432/database?sslmode=verify-ca&sslrootcert=/etc/config/sever-ca.pem"
+dsn: "sqlite://tmp.db"
 serve:
   host: "0.0.0.0"
   port: 8000

@@ -1,0 +1,275 @@
+basePath: /v1/api
+consumes:
+- application/json
+definitions:
+  Camera:
+    description: Camera is represents a singular camera which is accessible over the network
+    properties:
+      ID:
+        format: uint64
+        type: integer
+      ModelID:
+        format: uint64
+        type: integer
+      model:
+        $ref: '#/definitions/CameraModel'
+      name:
+        description: a custom name given to the camera (a short description)
+        type: string
+        x-go-name: Name
+      uuid:
+        description: an auto generated unique identifier for the camera
+        type: string
+        x-go-name: UUID
+    required:
+    - name
+    - model
+    type: object
+    x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
+  CameraLocation:
+    properties:
+      ID:
+        format: uint64
+        type: integer
+      addressLine1:
+        type: string
+        x-go-name: AddressLine1
+      addressLine2:
+        type: string
+        x-go-name: AddressLine2
+      addressLine3:
+        type: string
+        x-go-name: AddressLine3
+      city:
+        type: string
+        x-go-name: City
+      country:
+        type: string
+        x-go-name: Country
+      province:
+        type: string
+        x-go-name: Province
+    title: CameraLocation is the physical location of the camera.
+    type: object
+    x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
+  CameraModel:
+    properties:
+      ID:
+        format: uint64
+        type: integer
+      name:
+        description: the name such as RLC-411WS
+        type: string
+        x-go-name: Name
+      uuid:
+        description: an auto generated unique identifier for the model
+        type: string
+        x-go-name: UUID
+    required:
+    - name
+    title: CameraModel is the model/type of the camera. Many cameras can have the same model e.g. RLC-411WS.
+    type: object
+    x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
+  Proxy:
+    description: Proxy is a network configuration for connecting to a proxy server
+    properties:
+      ID:
+        format: uint64
+        type: integer
+      host:
+        type: string
+        x-go-name: Host
+      password:
+        type: string
+        x-go-name: Password
+      port:
+        type: string
+        x-go-name: Port
+      protocol:
+        type: string
+        x-go-name: Protocol
+      username:
+        type: string
+        x-go-name: Username
+    type: object
+    x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
+host: 0.0.0.0, localhost
+info:
+  contact:
+    email: alano@oleaintueri.com
+    name: Alano Terblanche
+    url: https://oleaintueri.com
+  description: |-
+    Package controllers
+    Holds all the controllers
+  license:
+    name: GPLv3
+    url: https://opensource.org/licenses/GPL-3.0
+paths:
+  /private/camera:
+    get:
+      consumes:
+      - application/json
+      description: Get an array of created cameras
+      operationId: cameras
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Camera
+          schema:
+            items:
+              $ref: '#/definitions/Camera'
+            type: array
+        "500":
+          $ref: '#/responses/generalResponse'
+        default:
+          $ref: '#/responses/generalResponse'
+      schemes:
+      - http
+      - https
+      summary: Get all cameras created
+      tags:
+      - array
+      - of
+    post:
+      consumes:
+      - application/json
+      description: A new camera will be returned.
+      operationId: camera
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Camera
+          schema:
+            $ref: '#/definitions/Camera'
+        "500":
+          $ref: '#/responses/generalResponse'
+        default:
+          $ref: '#/responses/generalResponse'
+      schemes:
+      - http
+      - https
+      summary: Create a new Camera
+      tags:
+      - create
+  /private/camera/model:
+    get:
+      consumes:
+      - application/json
+      description: Get an array of created models, such as [RLC-411WS, RLC-510, ...].
+      operationId: models
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CameraModel
+          schema:
+            items:
+              $ref: '#/definitions/CameraModel'
+            type: array
+        "500":
+          $ref: '#/responses/generalResponse'
+        default:
+          $ref: '#/responses/generalResponse'
+      schemes:
+      - http
+      - https
+      summary: Get all camera models
+      tags:
+      - array
+      - of
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Create a Camera Model such as RLC-411WS.
+        This will also return the newly created model.
+      operationId: model
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CameraModel
+          schema:
+            $ref: '#/definitions/CameraModel'
+        "500":
+          $ref: '#/responses/generalResponse'
+        default:
+          $ref: '#/responses/generalResponse'
+      schemes:
+      - http
+      - https
+      summary: Create a Camera Model
+      tags:
+      - create
+      - a
+      - camera
+  /private/network/proxy:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        The proxy setting is a reusable setting that can be
+        re-applied to created cameras.
+      operationId: proxy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Proxy
+          schema:
+            $ref: '#/definitions/Proxy'
+        "500":
+          $ref: '#/responses/generalResponse'
+        default:
+          $ref: '#/responses/generalResponse'
+      schemes:
+      - http
+      - https
+      summary: Create a new proxy setting
+      tags:
+      - create
+  /public/version:
+    get:
+      consumes:
+      - application/json
+      description: The version follows the semVer structure e.g. v0.0.1
+      operationId: version
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/versionResponse'
+        default:
+          $ref: '#/responses/versionResponse'
+      schemes:
+      - http
+      - https
+      summary: Get the current server version
+      tags:
+      - server
+produces:
+- application/json
+responses:
+  generalResponse:
+    description: |-
+      A GenericResponse is used to send back information to the client with a general status,
+      could be an error or a success message.
+    headers:
+      message:
+        type: string
+      status:
+        type: string
+  versionResponse:
+    description: |-
+      A VersionResponse is used to send back information to the client with a general status,
+      could be an error or a success message.
+    headers:
+      version:
+        type: string
+schemes:
+- http
+- https
+swagger: "2.0"

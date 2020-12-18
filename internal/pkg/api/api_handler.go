@@ -51,14 +51,28 @@ func NewApiHandler(db *procedures.DB) *Handler {
 }
 
 func (h *Handler) CreateEndpoints() {
+
 	v1 := h.Router.Group("/api/v1")
 	{
 		// Public group
 		public := v1.Group("/public")
 		{
-			public.GET("/version", func(context *gin.Context) {
-				context.JSON(200, gin.H{"version": "v0.0.1"})
-			})
+			// swagger:route GET /public/version server version
+			//
+			// Get the current server version
+			//
+			// The version follows the semVer structure e.g. v0.0.1
+			//
+			// Consumes:
+			// - application/json
+			// Produces:
+			// - application/json
+			// Schemes: http, https
+			// Deprecated: false
+			// Responses:
+			//	default: versionResponse
+			//	200: versionResponse
+			public.GET("/version", h.Version)
 		}
 
 		// private group (protected with auth)
@@ -66,15 +80,99 @@ func (h *Handler) CreateEndpoints() {
 		{
 			camera := private.Group("/camera")
 			{
+				// swagger:route POST /private/camera/model create a camera model
+				//
+				// Create a Camera Model
+				//
+				// Create a Camera Model such as RLC-411WS.
+				// This will also return the newly created model.
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: CameraModel
+				//	500: generalResponse
 				camera.POST("/model", h.CameraModelCreate)
+
+				// swagger:route GET /private/camera/model array of models
+				//
+				// Get all camera models
+				//
+				// Get an array of created models, such as [RLC-411WS, RLC-510, ...].
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: []CameraModel
+				//	500: generalResponse
 				camera.GET("/model", h.CameraModelRead)
 
+				// swagger:route POST /private/camera create camera
+				//
+				// Create a new Camera
+				//
+				// A new camera will be returned.
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: Camera
+				//	500: generalResponse
 				camera.POST("", h.CameraCreate)
+
+				// swagger:route GET /private/camera array of cameras
+				//
+				// Get all cameras created
+				//
+				// Get an array of created cameras
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: []Camera
+				//	500: generalResponse
 				camera.GET("", h.CameraRead)
 			}
 
 			network := private.Group("/network")
 			{
+				// swagger:route POST /private/network/proxy create proxy
+				//
+				// Create a new proxy setting
+				//
+				// The proxy setting is a reusable setting that can be
+				// re-applied to created cameras.
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: Proxy
+				//	500: generalResponse
 				network.POST("/proxy", h.NetworkProxyCreate)
 			}
 		}

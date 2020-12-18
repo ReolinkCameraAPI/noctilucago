@@ -7,4 +7,3 @@ import (
 type Factory struct {
 	Cameras []*pkg.Camera
 }
-

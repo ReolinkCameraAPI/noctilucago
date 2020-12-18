@@ -10,7 +10,7 @@
 ---
 
 A Reolink Camera Management server written in Go built off of 
-the [reolink-go-api](https://github.com/ReolinkCameraApi/reolink-go-api).
+the [reolinkapigo](https://github.com/ReolinkCameraAPI/reolinkapigo).
 This is the backend to the NoctiLuca frontend.
 
 ### Sponsorship
@@ -22,7 +22,7 @@ This is the backend to the NoctiLuca frontend.
 
 ---
 
-### This is still untested and heavily in development.
+### This is still untested and heavily in development. :construction:
 
 ### Join us on Discord
 
@@ -52,15 +52,12 @@ This is the backend to the NoctiLuca frontend.
     
 ### Configuration
 
-    Setup a yaml config file or use environment variables.
-    Copy the default configs from conf/noctiluca.yaml
-    
-    Environment Variables start with NOC_<key>
-    e.g.
-    NOC_HOST=0.0.0.0
-    NOC_PORT=8000
-    NOC_DNS=""
-    
+See the example in `examples` folder or go 
+[here](https://github.com/ReolinkCameraAPI/noctilucago/blob/main/examples/Configuration.md)
+
+When running the server without any configurations passed, the defaults will kick in for
+development testing. It is advised to read-up on the configurations to get it working for
+your use-case.
 
 ### Supported Cameras
 

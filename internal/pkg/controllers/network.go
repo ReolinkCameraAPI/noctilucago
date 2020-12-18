@@ -8,7 +8,7 @@ import (
 func (ac *ApiController) NetworkProxyCreate(c *gin.Context) {
 	var proxy models.Proxy
 	if c.BindJSON(&proxy) != nil {
-		c.JSON(500, Response{
+		c.JSON(500, GenericResponse{
 			Status:  "error",
 			Message: "Network Proxy information sent to the server is incorrect.",
 		})

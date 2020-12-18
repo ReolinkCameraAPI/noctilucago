@@ -48,7 +48,7 @@ func NewDatabase() (*DB, error) {
 	var extra string
 
 	switch scheme {
-	case "postgres":
+	case "postgresql":
 		if port == "" {
 			port = "5432"
 		}
@@ -94,6 +94,14 @@ func NewDatabase() (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	dbWrapper := &DB{db}
+
+	if scheme == "sqlite" {
+		err = dbWrapper.Migrate()
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	// Get the generic DB interface
 	sqlDb, err := db.DB()
@@ -105,7 +113,7 @@ func NewDatabase() (*DB, error) {
 	sqlDb.SetMaxIdleConns(maxIdleConns)
 	sqlDb.SetConnMaxLifetime(maxConnLifetime)
 
-	return &DB{db}, nil
+	return dbWrapper, nil
 }
 
 func (db *DB) Migrate() error {
