@@ -7,6 +7,7 @@ import (
 
 func (ac *ApiController) NetworkProxyCreate(c *gin.Context) {
 	var proxy models.Proxy
+
 	if c.BindJSON(&proxy) != nil {
 		c.JSON(500, GenericResponse{
 			Status:  "error",

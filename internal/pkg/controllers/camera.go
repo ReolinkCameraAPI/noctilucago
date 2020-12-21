@@ -39,6 +39,62 @@ func (ac *ApiController) CameraRead(c *gin.Context) {
 	c.JSON(200, cameras)
 }
 
+func (ac *ApiController) CameraDelete(c *gin.Context) {
+	cameraUUID, ok := c.Params.Get("uuid")
+
+	if !ok {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "UUID parameter needs to be set",
+		})
+	}
+
+	_, err := ac.db.CameraDelete(cameraUUID)
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Database error.",
+		})
+	}
+
+	c.JSON(200, GenericResponse{
+		Status:  "success",
+		Message: "camera successfully deleted",
+	})
+}
+
+func (ac *ApiController) CameraUpdate(c *gin.Context) {
+	cameraUUID, ok := c.Params.Get("uuid")
+
+	if !ok {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "UUID parameter needs to be set",
+		})
+	}
+
+	var camera models.Camera
+
+	if err := c.BindJSON(&camera); err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Camera data parse error. Ensure the data sent to the server is correct.",
+		})
+	}
+
+	dbCamera, err := ac.db.CameraUpdate(cameraUUID, camera)
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Database error.",
+		})
+	}
+
+	c.JSON(200, dbCamera)
+}
+
 func (ac *ApiController) CameraModelCreate(c *gin.Context) {
 	var model models.CameraModel
 	if err := c.BindJSON(&model); err != nil {

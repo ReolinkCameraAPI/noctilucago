@@ -82,6 +82,7 @@ func NewDatabase() (*DB, error) {
 	case "mysql":
 		// TODO: add mysql support
 		dsn = "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+		panic("mysql is unsupported")
 		break
 	case "sqlite":
 		db, err = gorm.Open(sqlite.Open(host), &gorm.Config{})

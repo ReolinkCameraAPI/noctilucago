@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/controllers"
 	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/procedures"
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -12,7 +13,8 @@ import (
 )
 
 type Handler struct {
-	Router *gin.Engine
+	Router        *gin.Engine
+	CameraService *service.CameraService
 	*controllers.ApiController
 }
 
@@ -44,8 +46,11 @@ func NewApiHandler(db *procedures.DB) *Handler {
 
 	apiController := controllers.NewApiController(db)
 
+	cameraService := service.NewCameraService()
+
 	return &Handler{
 		Router:        router,
+		CameraService: cameraService,
 		ApiController: apiController,
 	}
 }
@@ -152,6 +157,26 @@ func (h *Handler) CreateEndpoints() {
 				//	200: []Camera
 				//	500: generalResponse
 				camera.GET("", h.CameraRead)
+
+				// swagger:route DELETE /private/camera delete camera
+				//
+				// Delete specified camera
+				//
+				// Use the cameras' UUID to delete it
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: generalResponse
+				//	500: generalResponse
+				camera.DELETE("", h.CameraDelete)
+
+				camera.PUT("", h.CameraUpdate)
 			}
 
 			network := private.Group("/network")
