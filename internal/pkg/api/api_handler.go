@@ -63,8 +63,8 @@ func (h *Handler) CreateEndpoints() error {
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:         config.NlConfig.Auth.JWT.Issuer,
 		Key:           []byte(config.NlConfig.Auth.JWT.Key),
-		Timeout:       time.Hour,
-		MaxRefresh:    time.Hour,
+		Timeout:       time.Second * time.Duration(config.NlConfig.Auth.JWT.Timeout),
+		MaxRefresh:    time.Second * time.Duration(config.NlConfig.Auth.JWT.Refresh),
 		Authenticator: h.Login,
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			c.JSON(code, &controllers.GenericResponse{
@@ -131,9 +131,10 @@ func (h *Handler) CreateEndpoints() error {
 		}))
 		private.Use(authMiddleware.MiddlewareFunc())
 		{
-			camera := private.Group("/camera")
+
+			model := private.Group("/model")
 			{
-				// swagger:route POST /private/camera/model create a camera model
+				// swagger:route POST /private/model create a camera model
 				//
 				// Create a Camera Model
 				//
@@ -150,9 +151,9 @@ func (h *Handler) CreateEndpoints() error {
 				//	default: generalResponse
 				//	200: CameraModel
 				//	500: generalResponse
-				camera.POST("/model", h.CameraModelCreate)
+				model.POST("", h.CameraModelCreate)
 
-				// swagger:route GET /private/camera/model array of models
+				// swagger:route GET /private/model array of models
 				//
 				// Get all camera models
 				//
@@ -168,12 +169,17 @@ func (h *Handler) CreateEndpoints() error {
 				//	default: generalResponse
 				//	200: []CameraModel
 				//	500: generalResponse
-				camera.GET("/model", h.CameraModelRead)
+				model.GET("", h.CameraModelRead)
+			}
 
-				// swagger:route POST /private/camera create camera
+			camera := private.Group("/camera")
+			{
+
+				// swagger:route POST /private/camera/:model create camera
 				//
 				// Create a new Camera
 				//
+				// Pass the model uuid as a parameter and the rest of the information in the body.
 				// A new camera will be returned.
 				//
 				// Consumes:
@@ -186,7 +192,7 @@ func (h *Handler) CreateEndpoints() error {
 				//	default: generalResponse
 				//	200: Camera
 				//	500: generalResponse
-				camera.POST("", h.CameraCreate)
+				camera.POST("/:model", h.CameraCreate)
 
 				// swagger:route GET /private/camera array of cameras
 				//
@@ -263,6 +269,60 @@ func (h *Handler) CreateEndpoints() error {
 				//	200: Proxy
 				//	500: generalResponse
 				network.POST("/proxy", h.NetworkProxyCreate)
+
+				// swagger:route GET /private/network/proxy get all proxies
+				//
+				// Get all the proxies
+				//
+				// Get all the created proxies
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: []Proxy
+				//	500: generalResponse
+				network.GET("/proxy", h.NetworkProxyRead)
+
+				// swagger:route GET /private/network/proxy/:uuid get a singular proxies
+				//
+				// Get a singular proxy using its UUID
+				//
+				// Get the proxy settings object using its UUID
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: Proxy
+				//	500: generalResponse
+				network.GET("/proxy/:uuid", h.NetworkProxyReadUUID)
+
+				// swagger:route PUT /private/network/proxy/:uuid update proxy
+				//
+				// Update a proxy setting
+				//
+				// Pass the proxy's UUID with the updated proxy information
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: Proxy
+				//	500: generalResponse
+				network.PUT("/proxy/:uuid", h.NetworkProxyUpdate)
 			}
 
 			user := private.Group("/user")
@@ -303,7 +363,7 @@ func (h *Handler) CreateEndpoints() error {
 				//	500: generalResponse
 				user.POST("", h.UserCreate)
 
-				// swagger:route PUT /private/user update user
+				// swagger:route PUT /private/user/:uuid update user
 				//
 				// Update User
 				//
@@ -319,7 +379,7 @@ func (h *Handler) CreateEndpoints() error {
 				//	default: generalResponse
 				//	200: User
 				//	500: generalResponse
-				user.PUT("", h.UserUpdate)
+				user.PUT("/:uuid", h.UserUpdate)
 
 				// swagger:route DELETE /private/user delete user
 				//
@@ -337,14 +397,28 @@ func (h *Handler) CreateEndpoints() error {
 				//	default: generalResponse
 				//	200: generalResponse
 				//	500: generalResponse
-				user.DELETE("", h.UserDelete)
+				user.DELETE("/:uuid", h.UserDelete)
 			}
 
 			auth := private.Group("/auth")
 			{
+				// swagger:route GET /private/auth/refresh refresh the JWT token
+				//
+				// Refresh the JWT token
+				//
+				// The refresh token is set according to the `noctiluca` config `Refresh` option.
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: RefreshResponse
+				//	500: generalResponse
 				auth.GET("refresh", authMiddleware.RefreshHandler)
-
-				auth.GET("logout", authMiddleware.LogoutHandler)
 			}
 		}
 

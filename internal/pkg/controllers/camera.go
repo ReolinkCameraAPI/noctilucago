@@ -1,7 +1,8 @@
 package controllers
 
 import (
-	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models"
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/api/models"
+	dbmodels "github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,8 +14,9 @@ type Camera struct {
 }
 
 func (ac *ApiController) CameraCreate(c *gin.Context) {
+	modelUUID := c.Param("model")
 
-	var camera models.Camera
+	var camera *models.CameraInput
 
 	if err := c.ShouldBindJSON(&camera); err != nil {
 		c.JSON(500, GenericResponse{
@@ -24,7 +26,40 @@ func (ac *ApiController) CameraCreate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, camera)
+	dbCamera := &dbmodels.Camera{
+		Name: camera.Name,
+		Host: camera.Host,
+		Auth: &dbmodels.CameraAuth{
+			Username: camera.Username,
+			Password: camera.Password,
+		},
+	}
+
+	if camera.ProxyUUID != "" {
+		dbProxy, err := ac.db.NetworkProxyReadUUID(camera.ProxyUUID)
+
+		if err != nil {
+			c.JSON(500, GenericResponse{
+				Status:  "error",
+				Message: "Database error.",
+			})
+			return
+		}
+
+		dbCamera.ProxyID = dbProxy.ID
+	}
+
+	newCamera, err := ac.db.CameraCreate(modelUUID, dbCamera)
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Database error.",
+		})
+		return
+	}
+
+	c.JSON(200, newCamera)
 }
 
 func (ac *ApiController) CameraRead(c *gin.Context) {
@@ -79,7 +114,7 @@ func (ac *ApiController) CameraUpdate(c *gin.Context) {
 		return
 	}
 
-	var camera models.Camera
+	var camera models.CameraInput
 
 	if err := c.BindJSON(&camera); err != nil {
 		c.JSON(500, GenericResponse{
@@ -89,7 +124,16 @@ func (ac *ApiController) CameraUpdate(c *gin.Context) {
 		return
 	}
 
-	dbCamera, err := ac.db.CameraUpdate(cameraUUID, camera)
+	dbCamera := &dbmodels.Camera{
+		Name: camera.Name,
+		Host: camera.Host,
+		Auth: &dbmodels.CameraAuth{
+			Username: camera.Username,
+			Password: camera.Password,
+		},
+	}
+
+	updatedCamera, err := ac.db.CameraUpdate(cameraUUID, dbCamera)
 
 	if err != nil {
 		c.JSON(500, GenericResponse{
@@ -99,11 +143,11 @@ func (ac *ApiController) CameraUpdate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, dbCamera)
+	c.JSON(200, updatedCamera)
 }
 
 func (ac *ApiController) CameraModelCreate(c *gin.Context) {
-	var model models.CameraModel
+	var model models.CameraModelInput
 	if err := c.ShouldBindJSON(&model); err != nil {
 		c.JSON(500, GenericResponse{
 			Status:  "error",
@@ -112,7 +156,21 @@ func (ac *ApiController) CameraModelCreate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, model)
+	dbModel := &dbmodels.CameraModel{
+		Name: model.Name,
+	}
+
+	dbModel, err := ac.db.CameraModelCreate(dbModel)
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Camera Model data parse error. Ensure the data sent to the server is correct.",
+		})
+		return
+	}
+
+	c.JSON(200, dbModel)
 }
 
 func (ac *ApiController) CameraModelRead(c *gin.Context) {

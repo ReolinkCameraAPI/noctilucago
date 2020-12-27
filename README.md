@@ -61,12 +61,25 @@ advised to read-up on the configurations to get it working for your use-case.
 ### API Documentation
 
 This system uses [swagger](https://github.com/go-swagger/go-swagger) to generate the documentation needed from the
-source code. For a complete matrix of the API, see below table.
+source code. 
+
+To generate new swagger documentation run
+
+    swagger generate spec -o swagger.yaml
+
+Serve the html docs
+
+    swagger serve
+
+For a complete matrix of the API, see below table.
 
 | resource | GET | POST | PUT | DELETE | 
 | :------------- | :----------: | :-----------: | :-----------: | :-----------: |
 | camera | X | X | X | X |
 | model | X | X | - | - |
+| user | X | X | X | X |
+| network > Proxy | X | X | X | - |
+
 
 ### Supported Cameras
 

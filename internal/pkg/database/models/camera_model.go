@@ -1,7 +1,6 @@
 package models
 
 // Camera represents a singular camera which is accessible over the network
-// swagger:model
 type Camera struct {
 	ID uint64 `gorm:"primary_key"`
 	// an auto generated unique identifier for the camera
@@ -47,7 +46,6 @@ type CameraAuth struct {
 }
 
 // CameraModel is the model/type of the camera. Many cameras can have the same model e.g. RLC-411WS.
-// swagger:model
 type CameraModel struct {
 	ID uint64 `gorm:"primary_key"`
 	// an auto generated unique identifier for the model
@@ -55,11 +53,10 @@ type CameraModel struct {
 	UUID string `json:"uuid" gorm:"uniqueIndex"`
 	// the name such as RLC-411WS
 	// required: true
-	Name string `json:"name" binding:"required"`
+	Name string `json:"name"`
 }
 
 // CameraLocation is the physical location of the camera.
-// swagger:model
 type CameraLocation struct {
 	ID           uint64 `gorm:"primary_key"`
 	AddressLine1 string `json:"addressLine1,omitempty"`

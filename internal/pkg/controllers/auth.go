@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models"
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/api/models"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -9,7 +9,7 @@ import (
 
 func (ac *ApiController) Login(c *gin.Context) (interface{}, error) {
 
-	var user models.User
+	var user models.UserInput
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		return nil, jwt.ErrMissingLoginValues
@@ -27,14 +27,11 @@ func (ac *ApiController) Login(c *gin.Context) (interface{}, error) {
 		return nil, jwt.ErrFailedAuthentication
 	}
 
-	return map[string]interface{}{
-		"UUID":     dbUser.UUID,
-		"Username": dbUser.Username,
-	}, nil
+	return dbUser, nil
 }
 
 func (ac *ApiController) UserCreate(c *gin.Context) {
-	var user models.User
+	var user models.UserInput
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(500, &GenericResponse{
@@ -54,14 +51,13 @@ func (ac *ApiController) UserCreate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, map[string]interface{}{
-		"UUID":     dbUser.UUID,
-		"Username": dbUser.Username,
-	})
+	c.JSON(200, dbUser)
 }
 
 func (ac *ApiController) UserUpdate(c *gin.Context) {
-	var user models.User
+	userUUID := c.Param("uuid")
+
+	var user models.UserInput
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(500, &GenericResponse{
@@ -71,7 +67,7 @@ func (ac *ApiController) UserUpdate(c *gin.Context) {
 		return
 	}
 
-	dbUser, err := ac.db.UserUpdate(user.UUID, user.Username, user.Password)
+	dbUser, err := ac.db.UserUpdate(userUUID, user.Username, user.Password)
 
 	if err != nil {
 		c.JSON(500, &GenericResponse{
@@ -81,24 +77,13 @@ func (ac *ApiController) UserUpdate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, map[string]interface{}{
-		"UUID":     dbUser.UUID,
-		"Username": dbUser.Username,
-	})
+	c.JSON(200, dbUser)
 }
 
 func (ac *ApiController) UserDelete(c *gin.Context) {
-	var user models.User
+	userUUID := c.Param("uuid")
 
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(500, &GenericResponse{
-			Status:  "error",
-			Message: "Incorrect data payload sent",
-		})
-		return
-	}
-
-	_, err := ac.db.UserDelete(user.UUID)
+	_, err := ac.db.UserDelete(userUUID)
 
 	if err != nil {
 		c.JSON(500, &GenericResponse{

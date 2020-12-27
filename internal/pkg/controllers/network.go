@@ -1,12 +1,14 @@
 package controllers
 
 import (
-	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models"
+	"encoding/json"
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/api/models"
+	dbmodels "github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models"
 	"github.com/gin-gonic/gin"
 )
 
 func (ac *ApiController) NetworkProxyCreate(c *gin.Context) {
-	var proxy models.Proxy
+	var proxy models.ProxyInput
 
 	if c.ShouldBindJSON(&proxy) != nil {
 		c.JSON(500, GenericResponse{
@@ -16,7 +18,29 @@ func (ac *ApiController) NetworkProxyCreate(c *gin.Context) {
 		return
 	}
 
-	p, err := ac.db.NetworkProxyCreate(proxy)
+	data, err := json.Marshal(proxy)
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Network Proxy information sent to the server is incorrect.",
+		})
+		return
+	}
+
+	var dbProxy *dbmodels.Proxy
+
+	err = json.Unmarshal(data, &dbProxy)
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Network Proxy information sent to the server is incorrect.",
+		})
+		return
+	}
+
+	p, err := ac.db.NetworkProxyCreate(dbProxy)
 
 	if err != nil {
 		c.JSON(500, GenericResponse{
@@ -24,6 +48,81 @@ func (ac *ApiController) NetworkProxyCreate(c *gin.Context) {
 			Message: "Database error.",
 		})
 		return
+	}
+
+	c.JSON(200, p)
+}
+
+func (ac *ApiController) NetworkProxyRead(c *gin.Context) {
+
+	proxies, err := ac.db.NetworkProxyRead()
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Database error",
+		})
+	}
+
+	c.JSON(200, proxies)
+}
+
+func (ac *ApiController) NetworkProxyReadUUID(c *gin.Context) {
+	proxyUUID := c.Param("uuid")
+
+	proxy, err := ac.db.NetworkProxyReadUUID(proxyUUID)
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Database error",
+		})
+	}
+
+	c.JSON(200, proxy)
+
+}
+
+func (ac *ApiController) NetworkProxyUpdate(c *gin.Context) {
+	proxyUUID := c.Param("uuid")
+
+	var proxy *models.ProxyInput
+
+	if c.ShouldBindJSON(&proxy) != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Network Proxy information sent to the server is incorrect.",
+		})
+		return
+	}
+
+	data, err := json.Marshal(proxy)
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Network Proxy information sent to the server is incorrect",
+		})
+	}
+
+	var dbProxy *dbmodels.Proxy
+
+	err = json.Unmarshal(data, dbProxy)
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Network Proxy information sent to the server is incorrect",
+		})
+	}
+
+	p, err := ac.db.NetworkProxyUpdate(proxyUUID, dbProxy)
+
+	if err != nil {
+		c.JSON(500, GenericResponse{
+			Status:  "error",
+			Message: "Database error",
+		})
 	}
 
 	c.JSON(200, p)

@@ -18,6 +18,10 @@ type NoctiLucaAuthJwtConf struct {
 	Enabled bool   `koanf:"enabled"`
 	Key     string `koanf:"key"`
 	Issuer  string `koanf:"issuer"`
+	// Timeout of the JWT in seconds
+	Timeout int    `koanf:"timeout"`
+	// Refresh timeout of the JWT in seconds
+	Refresh int    `koanf:"refresh"`
 }
 
 type NoctiLucaServeConf struct {
@@ -44,6 +48,8 @@ func LoadConfigs(configPath string) {
 			Enabled: true,
 			Key:     "somereallysecretivekey1234!@#*!",
 			Issuer:  "NoctiLuca",
+			Timeout: 604800,
+			Refresh: 604800,
 		}},
 	}
 
