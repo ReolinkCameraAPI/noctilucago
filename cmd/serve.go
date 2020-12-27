@@ -1,5 +1,3 @@
-
-
 package cmd
 
 import (
@@ -37,7 +35,11 @@ func Serve() error {
 	}
 
 	handler := api.NewApiHandler(db)
-	handler.CreateEndpoints()
+	err = handler.CreateEndpoints()
+
+	if err != nil {
+		return err
+	}
 
 	port := os.Getenv("NOC_PORT")
 	host := os.Getenv("NOC_HOST")
@@ -58,4 +60,3 @@ func Serve() error {
 
 	return nil
 }
-

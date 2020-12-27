@@ -17,6 +17,7 @@ type NoctiLucaAuthConf struct {
 type NoctiLucaAuthJwtConf struct {
 	Enabled bool   `koanf:"enabled"`
 	Key     string `koanf:"key"`
+	Issuer  string `koanf:"issuer"`
 }
 
 type NoctiLucaServeConf struct {
@@ -30,7 +31,6 @@ type NoctiLucaConf struct {
 	Auth  NoctiLucaAuthConf  `koanf:"auth"`
 }
 
-
 var NlConfig *NoctiLucaConf
 
 func LoadConfigs(configPath string) {
@@ -40,6 +40,11 @@ func LoadConfigs(configPath string) {
 			Port: "8000",
 		},
 		DSN: "",
+		Auth: NoctiLucaAuthConf{JWT: NoctiLucaAuthJwtConf{
+			Enabled: true,
+			Key:     "somereallysecretivekey1234!@#*!",
+			Issuer:  "NoctiLuca",
+		}},
 	}
 
 	k := koanf.New(".")

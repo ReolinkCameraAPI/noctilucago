@@ -10,11 +10,11 @@ type Camera struct {
 
 	// a custom name given to the camera (a short description)
 	// required: true
-	Name string `json:"name"`
+	Name string `json:"name" binding:"required"`
 
 	// an ip address or domain
 	// required: true
-	Host string `json:"host"`
+	Host string `json:"host" binding:"required"`
 
 	// connection settings for a camera behind a proxy
 	// required: false
@@ -23,7 +23,7 @@ type Camera struct {
 
 	// the cameras' authentication details
 	// required: true
-	Auth *CameraAuth `json:"auth"`
+	Auth *CameraAuth `json:"auth" binding:"required"`
 
 	// the camera model such as RLC-411WS
 	// required: true
@@ -37,7 +37,7 @@ type CameraAuth struct {
 
 	// username
 	// required: true
-	Username string `json:"username"`
+	Username string `json:"username" binding:"required"`
 
 	// password
 	// required: true
@@ -55,7 +55,7 @@ type CameraModel struct {
 	UUID string `json:"uuid" gorm:"uniqueIndex"`
 	// the name such as RLC-411WS
 	// required: true
-	Name string `json:"name"`
+	Name string `json:"name" binding:"required"`
 }
 
 // CameraLocation is the physical location of the camera.
@@ -66,6 +66,6 @@ type CameraLocation struct {
 	AddressLine2 string `json:"addressLine2,omitempty"`
 	AddressLine3 string `json:"addressLine3,omitempty"`
 	Province     string `json:"province,omitempty"`
-	City         string `json:"city"`
-	Country      string `json:"country"`
+	City         string `json:"city" binding:"required"`
+	Country      string `json:"country" binding:"required"`
 }

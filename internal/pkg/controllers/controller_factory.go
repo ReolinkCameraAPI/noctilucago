@@ -28,6 +28,12 @@ type ApiController struct {
 	db *procedures.DB
 }
 
+// A SessionResponse is used to send back jwt tokens to the client.
+// swagger:response sessionResponse
+type SessionResponse struct {
+	Token string `json:"token"`
+}
+
 // A GenericResponse is used to send back information to the client with a general status,
 // could be an error or a success message.
 // swagger:response generalResponse
