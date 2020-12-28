@@ -1,5 +1,6 @@
 # the database url in the format: provider://username:password@host:port/endpoint
-dsn: "sqlite://tmp.db"
+# sqlite://tmp.db
+dsn: "postgresql://postgres@127.0.0.1:5432/noctiluca"
 serve:
   host: "0.0.0.0"
   port: 8000

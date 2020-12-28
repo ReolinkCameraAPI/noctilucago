@@ -2,7 +2,6 @@ package procedures
 
 import (
 	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models"
-	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/enum"
 	"github.com/dgryski/trifles/uuid"
 )
 
@@ -52,12 +51,4 @@ func (db *DB) NetworkProxyUpdate(uuid string, proxy *models.Proxy) (*models.Prox
 	}
 
 	return proxy, nil
-}
-
-func (db *DB) NetworkReadProtocol() []string {
-	return enum.ProtocolList()
-}
-
-func (db *DB) NetworkProxyReadScheme() []string {
-	return enum.SchemeList()
 }

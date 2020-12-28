@@ -26,6 +26,11 @@ type CameraInput struct {
 	// to this camera
 	// required: false
 	ProxyUUID string `json:"proxyUUID,omitempty"`
+
+	// LocationUUID is the unique location identifier linking this camera
+	// to a specific location
+	// required: false
+	LocationUUID string `json:"locationUUID,omitempty"`
 }
 
 // CameraModelInput is for creating and updating a camera model object

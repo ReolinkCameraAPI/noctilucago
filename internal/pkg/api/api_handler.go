@@ -251,6 +251,41 @@ func (h *Handler) CreateEndpoints() error {
 
 			network := private.Group("/network")
 			{
+
+				// swagger:route GET /private/network/protocols network protocols
+				//
+				// Get all the protocols accepted by the server
+				//
+				// A protocol can be UDP or TCP
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: {"protocols": []}
+				network.GET("/protocols", h.NetworkReadProtocol)
+
+				// swagger:route GET /private/network/proxy/schemes network proxy schemes
+				//
+				// Get all the proxy schemes accepted by the server
+				//
+				// The scheme can be HTTP, HTTPS or SOCKS5
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: generalResponse
+				//	200: {"schemes": []}
+				network.GET("proxy/schemes", h.NetworkProxyReadScheme)
+
 				// swagger:route POST /private/network/proxy create proxy
 				//
 				// Create a new proxy setting

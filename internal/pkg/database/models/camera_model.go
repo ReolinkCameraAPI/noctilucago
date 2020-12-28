@@ -28,6 +28,10 @@ type Camera struct {
 	// required: true
 	Model   *CameraModel `json:"model"`
 	ModelID uint64
+
+	// the location
+	Location   *Location `json:"location"`
+	LocationID uint64
 }
 
 // CameraAuth contains the camera authentication information, such as it's username and password
@@ -54,15 +58,4 @@ type CameraModel struct {
 	// the name such as RLC-411WS
 	// required: true
 	Name string `json:"name"`
-}
-
-// CameraLocation is the physical location of the camera.
-type CameraLocation struct {
-	ID           uint64 `gorm:"primary_key"`
-	AddressLine1 string `json:"addressLine1,omitempty"`
-	AddressLine2 string `json:"addressLine2,omitempty"`
-	AddressLine3 string `json:"addressLine3,omitempty"`
-	Province     string `json:"province,omitempty"`
-	City         string `json:"city" binding:"required"`
-	Country      string `json:"country" binding:"required"`
 }

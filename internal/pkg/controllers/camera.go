@@ -49,6 +49,20 @@ func (ac *ApiController) CameraCreate(c *gin.Context) {
 		dbCamera.ProxyID = dbProxy.ID
 	}
 
+	if camera.LocationUUID != "" {
+		dbLocation, err := ac.db.LocationReadByUUID(camera.LocationUUID)
+
+		if err != nil {
+			c.JSON(500, GenericResponse{
+				Status:  "error",
+				Message: "Database error.",
+			})
+			return
+		}
+
+		dbCamera.LocationID = dbLocation.ID
+	}
+
 	newCamera, err := ac.db.CameraCreate(modelUUID, dbCamera)
 
 	if err != nil {

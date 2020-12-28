@@ -35,7 +35,13 @@ func NewDatabase() (*DB, error) {
 	username := parsed.User.Username()
 	password, _ := parsed.User.Password()
 	host := parsed.Host
-	port := parsed.Port()
+	var port string
+
+	if strings.Contains(host, ":") {
+		port = strings.Split(host, ":")[1]
+		host = strings.Split(host, ":")[0]
+	}
+
 	scheme := parsed.Scheme
 	database := strings.Trim(parsed.Path, "/")
 	queries := parsed.Query()
@@ -53,8 +59,29 @@ func NewDatabase() (*DB, error) {
 			port = "5432"
 		}
 
+		host = fmt.Sprintf("host=%s", host)
+		port = fmt.Sprintf("port=%s", port)
+
+		dsn = fmt.Sprintf("%s %s", host, port)
+
+		if database != "" {
+			dsn = fmt.Sprintf("%s dbname=%s", dsn, database)
+		}
+
+		if username != "" {
+			dsn = fmt.Sprintf("%s user=%s", dsn, username)
+		}
+
+		if password != "" {
+			dsn = fmt.Sprintf("%s password=%s", dsn, password)
+		}
+
 		for key, val := range queries {
 			extra = fmt.Sprintf("%s %s=%s", extra, key, val[0])
+		}
+
+		if extra != "" {
+			dsn = fmt.Sprintf("%s %s", dsn, extra)
 		}
 
 		/*if sslmode = queries.Get("sslmode"); sslmode == "" {
@@ -75,8 +102,6 @@ func NewDatabase() (*DB, error) {
 			ssl = fmt.Sprintf("%s sslkey=%s", ssl, sslkey)
 		}*/
 
-		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s %s", host, port, username, password,
-			database, extra)
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		break
 	case "mysql":
@@ -120,11 +145,15 @@ func NewDatabase() (*DB, error) {
 func (db *DB) Migrate() error {
 	var tables []interface{}
 
+	tables = append(tables, models.User{})
+
 	tables = append(tables, models.Camera{})
 	tables = append(tables, models.CameraModel{})
-	tables = append(tables, models.CameraLocation{})
+	tables = append(tables, models.CameraAuth{})
 
 	tables = append(tables, models.Proxy{})
+
+	tables = append(tables, models.Location{})
 
 	if err := db.Debug().AutoMigrate(tables...); err != nil {
 		return err

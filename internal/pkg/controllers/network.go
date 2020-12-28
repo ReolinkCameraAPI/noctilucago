@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/api/models"
 	dbmodels "github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models"
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/enum"
 	"github.com/gin-gonic/gin"
 )
 
@@ -126,4 +127,18 @@ func (ac *ApiController) NetworkProxyUpdate(c *gin.Context) {
 	}
 
 	c.JSON(200, p)
+}
+
+func (ac *ApiController) NetworkReadProtocol(c *gin.Context) {
+	protocols := enum.ProtocolList()
+	c.JSON(200, map[string]interface{}{
+		"protocols": protocols,
+	})
+}
+
+func (ac *ApiController) NetworkProxyReadScheme(c *gin.Context) {
+	schemes := enum.SchemeList()
+	c.JSON(200, map[string]interface{}{
+		"schemes": schemes,
+	})
 }
