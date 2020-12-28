@@ -69,7 +69,7 @@ To generate new swagger documentation run
 
 Serve the html docs
 
-    swagger serve
+    swagger serve swagger.yaml
 
 For a complete matrix of the API, see below table.
 

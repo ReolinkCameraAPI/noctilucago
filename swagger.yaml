@@ -3,34 +3,69 @@ consumes:
 - application/json
 definitions:
   Camera:
-    description: Camera is represents a singular camera which is accessible over the network
+    description: Camera represents a singular camera which is accessible over the network
     properties:
-      ID:
-        format: uint64
-        type: integer
-      ModelID:
-        format: uint64
-        type: integer
+      auth:
+        $ref: '#/definitions/CameraAuth'
+      host:
+        description: an ip address or domain
+        type: string
+        x-go-name: Host
+      location:
+        $ref: '#/definitions/Location'
       model:
         $ref: '#/definitions/CameraModel'
       name:
         description: a custom name given to the camera (a short description)
         type: string
         x-go-name: Name
+      proxy:
+        $ref: '#/definitions/Proxy'
       uuid:
         description: an auto generated unique identifier for the camera
         type: string
         x-go-name: UUID
     required:
     - name
+    - host
+    - auth
     - model
     type: object
     x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
-  CameraLocation:
+  CameraAuth:
+    description: CameraAuth contains the camera authentication information, such as it's username and password
     properties:
-      ID:
-        format: uint64
-        type: integer
+      password:
+        description: password
+        type: string
+        x-go-name: Password
+      username:
+        description: username
+        type: string
+        x-go-name: Username
+    required:
+    - username
+    - password
+    type: object
+    x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
+  CameraModel:
+    properties:
+      name:
+        description: the name such as RLC-411WS
+        type: string
+        x-go-name: Name
+      uuid:
+        description: an auto generated unique identifier for the model
+        type: string
+        x-go-name: UUID
+    required:
+    - name
+    title: CameraModel is the model/type of the camera. Many cameras can have the same model e.g. RLC-411WS.
+    type: object
+    x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
+  Location:
+    description: Used to map cameras on.
+    properties:
       addressLine1:
         type: string
         x-go-name: AddressLine1
@@ -46,36 +81,28 @@ definitions:
       country:
         type: string
         x-go-name: Country
+      latitude:
+        description: Coordinates
+        format: double
+        type: number
+        x-go-name: Latitude
+      longitude:
+        format: float
+        type: number
+        x-go-name: Longitude
       province:
         type: string
         x-go-name: Province
-    title: CameraLocation is the physical location of the camera.
-    type: object
-    x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
-  CameraModel:
-    properties:
-      ID:
-        format: uint64
-        type: integer
-      name:
-        description: the name such as RLC-411WS
-        type: string
-        x-go-name: Name
       uuid:
-        description: an auto generated unique identifier for the model
+        description: The unique identifier for this Location
         type: string
         x-go-name: UUID
-    required:
-    - name
-    title: CameraModel is the model/type of the camera. Many cameras can have the same model e.g. RLC-411WS.
+    title: Location is a physical address.
     type: object
     x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
   Proxy:
     description: Proxy is a network configuration for connecting to a proxy server
     properties:
-      ID:
-        format: uint64
-        type: integer
       host:
         type: string
         x-go-name: Host
@@ -88,9 +115,27 @@ definitions:
       protocol:
         type: string
         x-go-name: Protocol
+      scheme:
+        type: string
+        x-go-name: Scheme
       username:
         type: string
         x-go-name: Username
+      uuid:
+        type: string
+        x-go-name: UUID
+    type: object
+    x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
+  User:
+    properties:
+      username:
+        description: Username is a unique name used by the user to log in to the system
+        type: string
+        x-go-name: Username
+      uuid:
+        description: UUID is an auto generated unique identifier for the user
+        type: string
+        x-go-name: UUID
     type: object
     x-go-package: github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/models
 host: 0.0.0.0, localhost
@@ -101,111 +146,216 @@ info:
     url: https://oleaintueri.com
   description: |-
     Package controllers
-    Holds all the controllers
+    Contains all the api controllers
   license:
     name: GPLv3
     url: https://opensource.org/licenses/GPL-3.0
 paths:
-  /private/camera:
+  /private/auth/refresh:
     get:
       consumes:
       - application/json
-      description: Get an array of created cameras
-      operationId: cameras
+      description: The refresh token is set according to the `noctiluca` config `Refresh` option.
+      operationId: AuthRefresh
+      produces:
+      - application/json
+      responses:
+        "500":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Refresh the JWT token
+      tags:
+      - auth
+  /private/camera:
+    delete:
+      consumes:
+      - application/json
+      description: Use the cameras' UUID to delete it
+      operationId: DeleteCamera
       produces:
       - application/json
       responses:
         "200":
-          description: Camera
-          schema:
-            items:
-              $ref: '#/definitions/Camera'
-            type: array
+          $ref: '#/responses/genericResponse'
         "500":
-          $ref: '#/responses/generalResponse'
+          $ref: '#/responses/genericResponse'
         default:
-          $ref: '#/responses/generalResponse'
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Delete specified camera
+      tags:
+      - camera
+    get:
+      consumes:
+      - application/json
+      description: Get an array of created cameras
+      operationId: GetAllCameras
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/cameraModelArrayResponse'
+        "500":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
       schemes:
       - http
       - https
       summary: Get all cameras created
       tags:
-      - array
-      - of
-    post:
+      - camera
+    put:
       consumes:
       - application/json
-      description: A new camera will be returned.
-      operationId: camera
+      description: Update an existing cameras' settings
+      operationId: UpdateCamera
       produces:
       - application/json
       responses:
         "200":
-          description: Camera
-          schema:
-            $ref: '#/definitions/Camera'
+          $ref: '#/responses/cameraResponse'
         "500":
-          $ref: '#/responses/generalResponse'
+          $ref: '#/responses/genericResponse'
         default:
-          $ref: '#/responses/generalResponse'
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Update the specified camera
+      tags:
+      - camera
+  /private/camera/:model:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Pass the model uuid as a parameter and the rest of the information in the body.
+        A new camera will be returned.
+      operationId: CreateCamera
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/cameraResponse'
+        "500":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
       schemes:
       - http
       - https
       summary: Create a new Camera
       tags:
-      - create
-  /private/camera/model:
+      - camera
+  /private/model:
     get:
       consumes:
       - application/json
       description: Get an array of created models, such as [RLC-411WS, RLC-510, ...].
-      operationId: models
+      operationId: GetAllModel
       produces:
       - application/json
       responses:
         "200":
-          description: CameraModel
-          schema:
-            items:
-              $ref: '#/definitions/CameraModel'
-            type: array
+          $ref: '#/responses/cameraModelArrayResponse'
         "500":
-          $ref: '#/responses/generalResponse'
+          $ref: '#/responses/genericResponse'
         default:
-          $ref: '#/responses/generalResponse'
+          $ref: '#/responses/genericResponse'
       schemes:
       - http
       - https
       summary: Get all camera models
       tags:
-      - array
-      - of
+      - model
     post:
       consumes:
       - application/json
       description: |-
         Create a Camera Model such as RLC-411WS.
         This will also return the newly created model.
-      operationId: model
+      operationId: CreateModel
       produces:
       - application/json
       responses:
         "200":
-          description: CameraModel
-          schema:
-            $ref: '#/definitions/CameraModel'
+          $ref: '#/responses/cameraModelResponse'
         "500":
-          $ref: '#/responses/generalResponse'
+          $ref: '#/responses/genericResponse'
         default:
-          $ref: '#/responses/generalResponse'
+          $ref: '#/responses/genericResponse'
       schemes:
       - http
       - https
       summary: Create a Camera Model
       tags:
-      - create
-      - a
-      - camera
+      - model
+  /private/network/protocols:
+    get:
+      consumes:
+      - application/json
+      description: A protocol can be UDP or TCP
+      operationId: GetAllProtocols
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/networkProtocolResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Get all the protocols accepted by the server
+      tags:
+      - protocols
+  /private/network/proxies:
+    get:
+      consumes:
+      - application/json
+      description: Get all the created proxies
+      operationId: GetAllProxies
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/networkProxyArrayResponse'
+        "500":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Get all the proxies
+      tags:
+      - proxy
+  /private/network/proxies/schemes:
+    get:
+      consumes:
+      - application/json
+      description: The scheme can be HTTP, HTTPS or SOCKS5
+      operationId: GetAllSchemes
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/networkProxySchemeResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Get all the proxy schemes accepted by the server
+      tags:
+      - schemes
   /private/network/proxy:
     post:
       consumes:
@@ -213,24 +363,163 @@ paths:
       description: |-
         The proxy setting is a reusable setting that can be
         re-applied to created cameras.
-      operationId: proxy
+      operationId: CreateProxy
       produces:
       - application/json
       responses:
         "200":
-          description: Proxy
-          schema:
-            $ref: '#/definitions/Proxy'
+          $ref: '#/responses/networkProxyResponse'
         "500":
-          $ref: '#/responses/generalResponse'
+          $ref: '#/responses/genericResponse'
         default:
-          $ref: '#/responses/generalResponse'
+          $ref: '#/responses/genericResponse'
       schemes:
       - http
       - https
       summary: Create a new proxy setting
       tags:
-      - create
+      - proxy
+  /private/network/proxy/:uuid:
+    get:
+      consumes:
+      - application/json
+      description: Get the proxy settings object using its UUID
+      operationId: GetOneProxy
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/networkProxyResponse'
+        "500":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Get a singular proxy using its UUID
+      tags:
+      - proxy
+    put:
+      consumes:
+      - application/json
+      description: Pass the proxy's UUID with the updated proxy information
+      operationId: UpdateProxy
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/networkProxyResponse'
+        "500":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Update a proxy setting
+      tags:
+      - proxy
+  /private/user:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing user account
+      operationId: DeleteUser
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/genericResponse'
+        "500":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Delete User
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: Get all the User Accounts
+      operationId: GetAllUsers
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/userArrayResponse'
+        "500":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Create a new User account for managing cameras
+      operationId: CreateUser
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/userResponse'
+        "500":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Create a new User account
+      tags:
+      - user
+  /private/user/:uuid:
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user's credentials
+      operationId: UpdateUser
+      produces:
+      - application/json
+      responses:
+        "200":
+          $ref: '#/responses/userResponse'
+        "500":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: Update User
+      tags:
+      - user
+  /public/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Log in with a username and password
+      operationId: AuthLogin
+      produces:
+      - application/json
+      responses:
+        "403":
+          $ref: '#/responses/genericResponse'
+        default:
+          $ref: '#/responses/genericResponse'
+      schemes:
+      - http
+      - https
+      summary: User Login
+      tags:
+      - auth
   /public/version:
     get:
       consumes:
@@ -253,7 +542,27 @@ paths:
 produces:
 - application/json
 responses:
-  generalResponse:
+  cameraArrayResponse:
+    description: CameraArrayResponse used when retrieving multiple camera models
+    schema:
+      items:
+        $ref: '#/definitions/Camera'
+      type: array
+  cameraModelArrayResponse:
+    description: CameraModelArrayResponse is used when retrieving multiple camera models
+    schema:
+      items:
+        $ref: '#/definitions/CameraModel'
+      type: array
+  cameraModelResponse:
+    description: CameraModelResponse used when creating and updating a camera model
+    schema:
+      $ref: '#/definitions/CameraModel'
+  cameraResponse:
+    description: CameraResponse used when creating and updating a camera
+    schema:
+      $ref: '#/definitions/Camera'
+  genericResponse:
     description: |-
       A GenericResponse is used to send back information to the client with a general status,
       could be an error or a success message.
@@ -262,6 +571,51 @@ responses:
         type: string
       status:
         type: string
+  networkProtocolResponse:
+    description: NetworkProtocolResponse is used when returning the supported server protocols
+    schema:
+      properties:
+        protocols:
+          items:
+            type: string
+          type: array
+          x-go-name: Protocols
+      type: object
+  networkProxyArrayResponse:
+    description: NetworkProxyArrayResponse is used when returning multiple proxy settings
+    schema:
+      items:
+        $ref: '#/definitions/Proxy'
+      type: array
+  networkProxyResponse:
+    description: NetworkProxyResponse is used when creating and updating a proxy setting
+    schema:
+      $ref: '#/definitions/Proxy'
+  networkProxySchemeResponse:
+    description: NetworkProxySchemeResponse is used when returning the supported server schemes
+    schema:
+      properties:
+        schemes:
+          items:
+            type: string
+          type: array
+          x-go-name: Schemes
+      type: object
+  sessionResponse:
+    description: A SessionResponse is used to send back jwt tokens to the client.
+    headers:
+      token:
+        type: string
+  userArrayResponse:
+    description: UserArrayResponse is used when retrieving multiple user accounts
+    schema:
+      items:
+        $ref: '#/definitions/User'
+      type: array
+  userResponse:
+    description: UserResponse is used when creating or updating a user account
+    schema:
+      $ref: '#/definitions/User'
   versionResponse:
     description: |-
       A VersionResponse is used to send back information to the client with a general status,

@@ -6,9 +6,15 @@ serve:
   port: 8000
 auth:
   jwt:
-    enabled: false
+    enabled: true
     key: a-very-strong-key
     # timeout is in seconds
-    timeout:  500
+    timeout: 500
     # refresh is in seconds
-    refresh:  500
+    refresh: 500
+  
+  # default admin account, create if this user does not exist
+  admin:
+    enabled: true
+    username: admin
+    password: admin

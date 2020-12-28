@@ -3,6 +3,7 @@ package models
 // Location is a physical address.
 // Used to map cameras on.
 type Location struct {
+	// swagger:ignore
 	ID uint64 `gorm:"primary_key"`
 	// The unique identifier for this Location
 	UUID         string `json:"uuid" gorm:"uniqueIndex"`

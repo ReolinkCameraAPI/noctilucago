@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/ReolinkCameraAPI/noctilucago/config"
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/api/responses"
 	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/controllers"
 	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/database/procedures"
 	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/service"
@@ -67,7 +68,7 @@ func (h *Handler) CreateEndpoints() error {
 		MaxRefresh:    time.Second * time.Duration(config.NlConfig.Auth.JWT.Refresh),
 		Authenticator: h.Login,
 		Unauthorized: func(c *gin.Context, code int, message string) {
-			c.JSON(code, &controllers.GenericResponse{
+			c.JSON(code, responses.GenericResponse{
 				Status:  "error",
 				Message: message,
 			})
@@ -104,7 +105,7 @@ func (h *Handler) CreateEndpoints() error {
 
 			auth := public.Group("/auth")
 			{
-				// swagger:route GET /public/auth/login user login
+				// swagger:route POST /public/auth/login auth AuthLogin
 				//
 				// User Login
 				//
@@ -118,7 +119,6 @@ func (h *Handler) CreateEndpoints() error {
 				// Deprecated: false
 				// Responses:
 				//	default: genericResponse
-				//	200: sessionResponse
 				//  403: genericResponse
 				auth.POST("/login", authMiddleware.LoginHandler)
 			}
@@ -134,7 +134,7 @@ func (h *Handler) CreateEndpoints() error {
 
 			model := private.Group("/model")
 			{
-				// swagger:route POST /private/model create a camera model
+				// swagger:route POST /private/model model CreateModel
 				//
 				// Create a Camera Model
 				//
@@ -148,12 +148,12 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: CameraModel
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: cameraModelResponse
+				//	500: genericResponse
 				model.POST("", h.CameraModelCreate)
 
-				// swagger:route GET /private/model array of models
+				// swagger:route GET /private/model model GetAllModel
 				//
 				// Get all camera models
 				//
@@ -166,16 +166,16 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: []CameraModel
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: cameraModelArrayResponse
+				//	500: genericResponse
 				model.GET("", h.CameraModelRead)
 			}
 
 			camera := private.Group("/camera")
 			{
 
-				// swagger:route POST /private/camera/:model create camera
+				// swagger:route POST /private/camera/:model camera CreateCamera
 				//
 				// Create a new Camera
 				//
@@ -189,12 +189,12 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: Camera
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: cameraResponse
+				//	500: genericResponse
 				camera.POST("/:model", h.CameraCreate)
 
-				// swagger:route GET /private/camera array of cameras
+				// swagger:route GET /private/camera camera GetAllCameras
 				//
 				// Get all cameras created
 				//
@@ -207,12 +207,12 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: []Camera
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: cameraModelArrayResponse
+				//	500: genericResponse
 				camera.GET("", h.CameraRead)
 
-				// swagger:route DELETE /private/camera delete camera
+				// swagger:route DELETE /private/camera camera DeleteCamera
 				//
 				// Delete specified camera
 				//
@@ -225,12 +225,12 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: generalResponse
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: genericResponse
+				//	500: genericResponse
 				camera.DELETE("", h.CameraDelete)
 
-				// swagger:route PUT /private/camera update camera
+				// swagger:route PUT /private/camera camera UpdateCamera
 				//
 				// Update the specified camera
 				//
@@ -243,50 +243,16 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: Camera
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: cameraResponse
+				//	500: genericResponse
 				camera.PUT("", h.CameraUpdate)
 			}
 
 			network := private.Group("/network")
 			{
 
-				// swagger:route GET /private/network/protocols network protocols
-				//
-				// Get all the protocols accepted by the server
-				//
-				// A protocol can be UDP or TCP
-				//
-				// Consumes:
-				// - application/json
-				// Produces:
-				// - application/json
-				// Schemes: http, https
-				// Deprecated: false
-				// Responses:
-				//	default: generalResponse
-				//	200: {"protocols": []}
-				network.GET("/protocols", h.NetworkReadProtocol)
-
-				// swagger:route GET /private/network/proxy/schemes network proxy schemes
-				//
-				// Get all the proxy schemes accepted by the server
-				//
-				// The scheme can be HTTP, HTTPS or SOCKS5
-				//
-				// Consumes:
-				// - application/json
-				// Produces:
-				// - application/json
-				// Schemes: http, https
-				// Deprecated: false
-				// Responses:
-				//	default: generalResponse
-				//	200: {"schemes": []}
-				network.GET("proxy/schemes", h.NetworkProxyReadScheme)
-
-				// swagger:route POST /private/network/proxy create proxy
+				// swagger:route POST /private/network/proxy proxy CreateProxy
 				//
 				// Create a new proxy setting
 				//
@@ -300,48 +266,12 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: Proxy
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: networkProxyResponse
+				//	500: genericResponse
 				network.POST("/proxy", h.NetworkProxyCreate)
 
-				// swagger:route GET /private/network/proxy get all proxies
-				//
-				// Get all the proxies
-				//
-				// Get all the created proxies
-				//
-				// Consumes:
-				// - application/json
-				// Produces:
-				// - application/json
-				// Schemes: http, https
-				// Deprecated: false
-				// Responses:
-				//	default: generalResponse
-				//	200: []Proxy
-				//	500: generalResponse
-				network.GET("/proxy", h.NetworkProxyRead)
-
-				// swagger:route GET /private/network/proxy/:uuid get a singular proxies
-				//
-				// Get a singular proxy using its UUID
-				//
-				// Get the proxy settings object using its UUID
-				//
-				// Consumes:
-				// - application/json
-				// Produces:
-				// - application/json
-				// Schemes: http, https
-				// Deprecated: false
-				// Responses:
-				//	default: generalResponse
-				//	200: Proxy
-				//	500: generalResponse
-				network.GET("/proxy/:uuid", h.NetworkProxyReadUUID)
-
-				// swagger:route PUT /private/network/proxy/:uuid update proxy
+				// swagger:route PUT /private/network/proxy/:uuid proxy UpdateProxy
 				//
 				// Update a proxy setting
 				//
@@ -354,16 +284,86 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: Proxy
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: networkProxyResponse
+				//	500: genericResponse
 				network.PUT("/proxy/:uuid", h.NetworkProxyUpdate)
+
+				// swagger:route GET /private/network/proxy/:uuid proxy GetOneProxy
+				//
+				// Get a singular proxy using its UUID
+				//
+				// Get the proxy settings object using its UUID
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: genericResponse
+				//	200: networkProxyResponse
+				//	500: genericResponse
+				network.GET("/proxy/:uuid", h.NetworkProxyReadUUID)
+
+				// swagger:route GET /private/network/proxies proxy GetAllProxies
+				//
+				// Get all the proxies
+				//
+				// Get all the created proxies
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: genericResponse
+				//	200: networkProxyArrayResponse
+				//	500: genericResponse
+				network.GET("/proxies", h.NetworkProxyRead)
+
+				// swagger:route GET /private/network/proxies/schemes schemes GetAllSchemes
+				//
+				// Get all the proxy schemes accepted by the server
+				//
+				// The scheme can be HTTP, HTTPS or SOCKS5
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: genericResponse
+				//	200: networkProxySchemeResponse
+				network.GET("/proxies/schemes", h.NetworkProxyReadScheme)
+
+				// swagger:route GET /private/network/protocols protocols GetAllProtocols
+				//
+				// Get all the protocols accepted by the server
+				//
+				// A protocol can be UDP or TCP
+				//
+				// Consumes:
+				// - application/json
+				// Produces:
+				// - application/json
+				// Schemes: http, https
+				// Deprecated: false
+				// Responses:
+				//	default: genericResponse
+				//	200: networkProtocolResponse
+				network.GET("/protocols", h.NetworkReadProtocol)
 			}
 
 			user := private.Group("/user")
 			{
 
-				// swagger:route GET /private/user all User accounts
+				// swagger:route GET /private/user user GetAllUsers
 				//
 				// Get all the User Accounts
 				//
@@ -375,12 +375,12 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: []User
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: userArrayResponse
+				//	500: genericResponse
 				user.GET("", h.UserRead)
 
-				// swagger:route POST /private/user create User account
+				// swagger:route POST /private/user user CreateUser
 				//
 				// Create a new User account
 				//
@@ -393,12 +393,12 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: User
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: userResponse
+				//	500: genericResponse
 				user.POST("", h.UserCreate)
 
-				// swagger:route PUT /private/user/:uuid update user
+				// swagger:route PUT /private/user/:uuid user UpdateUser
 				//
 				// Update User
 				//
@@ -411,12 +411,12 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: User
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: userResponse
+				//	500: genericResponse
 				user.PUT("/:uuid", h.UserUpdate)
 
-				// swagger:route DELETE /private/user delete user
+				// swagger:route DELETE /private/user user DeleteUser
 				//
 				// Delete User
 				//
@@ -429,15 +429,15 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: generalResponse
-				//	500: generalResponse
+				//	default: genericResponse
+				//	200: genericResponse
+				//	500: genericResponse
 				user.DELETE("/:uuid", h.UserDelete)
 			}
 
 			auth := private.Group("/auth")
 			{
-				// swagger:route GET /private/auth/refresh refresh the JWT token
+				// swagger:route GET /private/auth/refresh auth AuthRefresh
 				//
 				// Refresh the JWT token
 				//
@@ -450,9 +450,8 @@ func (h *Handler) CreateEndpoints() error {
 				// Schemes: http, https
 				// Deprecated: false
 				// Responses:
-				//	default: generalResponse
-				//	200: RefreshResponse
-				//	500: generalResponse
+				//	default: genericResponse
+				//	500: genericResponse
 				auth.GET("refresh", authMiddleware.RefreshHandler)
 			}
 		}

@@ -1,7 +1,10 @@
 package controllers
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/api/responses"
+	"github.com/gin-gonic/gin"
+)
 
 func (ac *ApiController) Version(c *gin.Context) {
-	c.JSON(200, VersionResponse{Version: "v0.0.1"})
+	c.JSON(200, responses.VersionResponse{Version: "v0.0.1"})
 }

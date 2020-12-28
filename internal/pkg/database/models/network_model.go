@@ -2,6 +2,7 @@ package models
 
 // Proxy is a network configuration for connecting to a proxy server
 type Proxy struct {
+	// swagger:ignore
 	ID       uint64 `gorm:"primary_key"`
 	UUID     string `json:"uuid,omitempty"`
 	Host     string `json:"host"`

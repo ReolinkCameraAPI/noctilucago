@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/api/models"
+	"github.com/ReolinkCameraAPI/noctilucago/internal/pkg/api/responses"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -27,14 +28,14 @@ func (ac *ApiController) Login(c *gin.Context) (interface{}, error) {
 		return nil, jwt.ErrFailedAuthentication
 	}
 
-	return dbUser, nil
+	return responses.UserResponse{Body: dbUser}, nil
 }
 
 func (ac *ApiController) UserCreate(c *gin.Context) {
 	var user models.UserInput
 
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(500, &GenericResponse{
+		c.JSON(500, responses.GenericResponse{
 			Status:  "error",
 			Message: "Incorrect data payload sent",
 		})
@@ -44,7 +45,7 @@ func (ac *ApiController) UserCreate(c *gin.Context) {
 	dbUser, err := ac.db.UserCreate(user.Username, user.Password)
 
 	if err != nil {
-		c.JSON(500, &GenericResponse{
+		c.JSON(500, responses.GenericResponse{
 			Status:  "error",
 			Message: "User could not be created",
 		})
@@ -60,7 +61,7 @@ func (ac *ApiController) UserUpdate(c *gin.Context) {
 	var user models.UserInput
 
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(500, &GenericResponse{
+		c.JSON(500, responses.GenericResponse{
 			Status:  "error",
 			Message: "Incorrect data payload sent",
 		})
@@ -70,7 +71,7 @@ func (ac *ApiController) UserUpdate(c *gin.Context) {
 	dbUser, err := ac.db.UserUpdate(userUUID, user.Username, user.Password)
 
 	if err != nil {
-		c.JSON(500, &GenericResponse{
+		c.JSON(500, responses.GenericResponse{
 			Status:  "error",
 			Message: "Could not update user",
 		})
@@ -86,14 +87,14 @@ func (ac *ApiController) UserDelete(c *gin.Context) {
 	_, err := ac.db.UserDelete(userUUID)
 
 	if err != nil {
-		c.JSON(500, &GenericResponse{
+		c.JSON(500, responses.GenericResponse{
 			Status:  "error",
 			Message: "Could not delete user",
 		})
 		return
 	}
 
-	c.JSON(200, &GenericResponse{
+	c.JSON(200, responses.GenericResponse{
 		Status:  "success",
 		Message: "User deleted",
 	})
@@ -103,7 +104,7 @@ func (ac *ApiController) UserRead(c *gin.Context) {
 	users, err := ac.db.UserRead()
 
 	if err != nil {
-		c.JSON(500, &GenericResponse{
+		c.JSON(500, responses.GenericResponse{
 			Status:  "error",
 			Message: "Could not find users",
 		})
